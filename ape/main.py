@@ -10,6 +10,8 @@ from ape.exceptions import TaskNotFound, FeatureNotFound, EnvironmentIncomplete,
 from ape import tasks
 
 
+from argparse import ArgumentParser
+from typing import Callable, List, Tuple, Union
 ERRMSG_UNSUPPORTED_SIG = '''Task "%s" has an unsupported signature.
 Supported signatures are:
     - *args only
@@ -18,7 +20,7 @@ Supported signatures are:
 '''
 
 
-def get_task_parser(task):
+def get_task_parser(task: Callable) -> Tuple[ArgumentParser, bool]:
     """
     Construct an ArgumentParser for the given task.
 
@@ -50,7 +52,7 @@ def get_task_parser(task):
         raise InvalidTask(ERRMSG_UNSUPPORTED_SIG % task.__name__)
 
 
-def invoke_task(task, args):
+def invoke_task(task: Callable, args: Union[Tuple, List[str]]) -> None:
     """
     Parse args and invoke task function.
 

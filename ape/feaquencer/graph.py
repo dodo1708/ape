@@ -3,8 +3,10 @@ from __future__ import unicode_literals
 from collections import defaultdict
 
 
+from collections import OrderedDict, defaultdict
+from typing import Any, Dict, List, Optional, Set, Union
 class GraphCycleError(Exception):
-    def __init__(self, cycle):
+    def __init__(self, cycle: List[str]) -> None:
         msg = "Cycle was detected in dependency graph: \n \t"
         for idx, feature in enumerate(cycle):
             msg += " {feature}".format(feature=feature)
@@ -29,7 +31,7 @@ def to_graphviz(graph):
     return '\n'.join(ret)
 
 
-def _dfs_cycle_detect(graph, node, path, visited_nodes):
+def _dfs_cycle_detect(graph: Union[OrderedDict, Dict[str, List[str]], defaultdict, Dict[str, List[Any]]], node: str, path: List[str], visited_nodes: Set[str]) -> Optional[List[str]]:
     """
     search graph for cycle using DFS continuing from node
     path contains the list of visited nodes currently on the stack
@@ -50,7 +52,7 @@ def _dfs_cycle_detect(graph, node, path, visited_nodes):
     return None
 
 
-def detect_cycle(graph):
+def detect_cycle(graph: Union[OrderedDict, Dict[str, List[str]], defaultdict, Dict[str, List[Any]]]) -> Optional[List[str]]:
     """
     search the given directed graph for cycles
 
@@ -70,7 +72,7 @@ def detect_cycle(graph):
     return None
 
 
-def topsort(graph):
+def topsort(graph: Union[OrderedDict, defaultdict, Dict[str, List[str]], Dict[str, List[Any]]]) -> List[str]:
     """
     For the given graph, returns a list of nodes in topological order
     In py3 the behaviour of this function differs from py2,

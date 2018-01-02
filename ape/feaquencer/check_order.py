@@ -7,6 +7,7 @@ import copy
 from . import topsort, GraphCycleError
 from . import detect_cycle
 
+from typing import Dict, List, Optional, Union
 C_TYPES = (
     'first',
     'last',
@@ -21,13 +22,13 @@ AFTER = C_TYPES[3]
 
 
 class MultipleFirstConditionsError(Exception):
-    def __init__(self, msg, occ1, occ2):
+    def __init__(self, msg: str, occ1: str, occ2: OrderingCondition) -> None:
         super(MultipleFirstConditionsError, self).__init__(msg)
         self.occurences = [occ1, occ2]
 
 
 class MultipleLastConditionsError(Exception):
-    def __init__(self, msg, occ1, occ2):
+    def __init__(self, msg: str, occ1: str, occ2: OrderingCondition) -> None:
         super(MultipleLastConditionsError, self).__init__(msg)
         self.occurences = [occ1, occ2]
 
@@ -41,7 +42,7 @@ class OrderingCondition(object):
     subject = None
     ctype = None
 
-    def __init__(self, name, subject, ctype):
+    def __init__(self, name: str, subject: Optional[str], ctype: str) -> None:
         if ctype not in C_TYPES:
             raise NotImplementedError('Selected ConditionType ({ctype}) is not available! Choose on of the available: {C_TYPES}'.format(
                 ctype=ctype,
@@ -53,7 +54,7 @@ class OrderingCondition(object):
 
 
 class OrderingConditions(object):
-    def __init__(self, ordering_conditions=None):
+    def __init__(self, ordering_conditions: Optional[List[OrderingCondition]] = None) -> None:
         self.first = None
         self.last = None
         # self.before stores features as keys.
@@ -63,7 +64,7 @@ class OrderingConditions(object):
             for condition in ordering_conditions:
                 self.add_condition(condition)
 
-    def add_condition(self, condition):
+    def add_condition(self, condition: OrderingCondition) -> None:
         ctype = condition.ctype
         if ctype == FIRST:
             if not self.first:
@@ -100,7 +101,7 @@ class OrderingConditions(object):
                 self.before[condition.name].append(condition.subject)
 
 
-def _get_formatted_feature_dependencies(data):
+def _get_formatted_feature_dependencies(data: Dict[str, Union[Dict[str, List[str]], Dict[str, bool], Dict[str, Union[List[str], bool]]]]) -> List[Dict[str, Union[str, NoneType]]]:
     """
     Takes the format of the feature_order.json in featuremodel pool.
     Creates a list of conditions in the following format:
@@ -137,7 +138,7 @@ def _get_formatted_feature_dependencies(data):
     return conditions
 
 
-def _get_condition_instances(data):
+def _get_condition_instances(data: List[Dict[str, Union[str, NoneType]]]) -> List[OrderingCondition]:
     """
     Returns a list of OrderingCondition instances created from the passed data structure.
     The structure should be a list of dicts containing the necessary information:
@@ -163,29 +164,29 @@ def _get_condition_instances(data):
 
 
 class Feaquencer(object):
-    def __init__(self, feature_selection, feature_dependencies):
+    def __init__(self, feature_selection: List[str], feature_dependencies: Dict[str, Union[Dict[str, List[str]], Dict[str, bool], Dict[str, Union[List[str], bool]]]]) -> None:
         self.feature_set = set(feature_selection)
         self.feature_dependencies = feature_dependencies
 
-    def arrange(self):
+    def arrange(self) -> None:
         self._init_graph()
         self._enrich_graph()
         self._validate_graph()
 
-    def get_order(self):
+    def get_order(self) -> List[str]:
         return self._get_total_order()
 
-    def _init_graph(self):
+    def _init_graph(self) -> None:
         ordering_conditions = self._get_conditions()
         self.first = copy.deepcopy(ordering_conditions.first)
         self.last = copy.deepcopy(ordering_conditions.last)
         self.graph = copy.deepcopy(ordering_conditions.before)
 
-    def _get_conditions(self):
+    def _get_conditions(self) -> OrderingConditions:
         condition_list = _get_condition_instances(_get_formatted_feature_dependencies(self.feature_dependencies))
         return OrderingConditions(condition_list)
 
-    def _enrich_graph(self):
+    def _enrich_graph(self) -> None:
         """
         Enrich the graph with the implicit conditions (first appears in every before-list,
         before-list of last should contain every feature, ...)
@@ -194,7 +195,7 @@ class Feaquencer(object):
         self._add_missing_nodes()
         self._populate_befores()
 
-    def _populate_befores(self):
+    def _populate_befores(self) -> None:
         for feature in self.graph.keys():
             if self.first:
                 if feature != self.first and feature not in set(self.graph[feature]):
@@ -203,18 +204,18 @@ class Feaquencer(object):
                 if feature != self.last and feature not in set(self.graph[self.last]):
                     self.graph[self.last].append(feature)
 
-    def _add_missing_nodes(self):
+    def _add_missing_nodes(self) -> None:
         features_in_graph = set(self.graph.keys())
         for feature in self.feature_set:
             if feature not in features_in_graph:
                 self.graph[feature] = list()
 
-    def _validate_graph(self):
+    def _validate_graph(self) -> None:
         cycle = detect_cycle(self.graph)
         if cycle:
             raise GraphCycleError(cycle)
 
-    def _get_total_order(self):
+    def _get_total_order(self) -> List[str]:
         total_order_with_too_many_features = reversed(topsort(self.graph))
         total_order_with_selected_features = list()
         for feature in total_order_with_too_many_features:
@@ -223,7 +224,7 @@ class Feaquencer(object):
         return total_order_with_selected_features
 
 
-def get_total_order(feature_selection, feature_dependencies):
+def get_total_order(feature_selection: List[str], feature_dependencies: Dict[str, Union[Dict[str, List[str]], Dict[str, bool], Dict[str, Union[List[str], bool]]]]) -> List[str]:
     feaquencer = Feaquencer(feature_selection, feature_dependencies)
     feaquencer.arrange()
     return feaquencer.get_order()

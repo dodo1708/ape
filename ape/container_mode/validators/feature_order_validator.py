@@ -1,6 +1,7 @@
 from __future__ import print_function, unicode_literals
 import operator
 
+from typing import Dict, List, Tuple, Union
 __all__ = ['FeatureOrderValidator', ]
 
 
@@ -10,7 +11,7 @@ class FeatureOrderValidator(object):
     and the passed constraints.
     """
 
-    def __init__(self, feature_list, constraints):
+    def __init__(self, feature_list: List[str], constraints: Dict[str, Union[Dict[str, int], Dict[str, List[str]], Dict[str, Union[bool, List[str]]]]]) -> None:
         """
         Constructor;
         :param feature_list: list of feature names
@@ -22,7 +23,7 @@ class FeatureOrderValidator(object):
         self.constraints = constraints
         self.violations = []
 
-    def check_order(self):
+    def check_order(self) -> bool:
         """
         Performs the check and store the violations in self.violations.
         :return: boolean indicating the error state
@@ -35,7 +36,7 @@ class FeatureOrderValidator(object):
 
         return not self.has_errors()
 
-    def _check_feature(self, feature, info, mode):
+    def _check_feature(self, feature: str, info: Dict[str, Union[List[str], int]], mode: str) -> None:
         """
         Private helper method performing the order check.
         :param feature: the feature to check.
@@ -69,7 +70,7 @@ class FeatureOrderValidator(object):
                         )
                         self.violations.append((feature, message))
 
-    def _check_position(self, feature, info):
+    def _check_position(self, feature: str, info: Dict[str, Union[List[str], int]]) -> None:
         """
         Takes the featur and the info dict and checks for the forced position
         :param feature:
@@ -88,7 +89,7 @@ class FeatureOrderValidator(object):
                     )
                     self.violations.append((feature, message))
 
-    def get_feature_position(self, feature):
+    def get_feature_position(self, feature: str) -> int:
         """
         Take the name of a feature and returns the position of that feature in self.feature_list.
         :param feature:
@@ -99,8 +100,8 @@ class FeatureOrderValidator(object):
         except ValueError:
             return None
 
-    def has_errors(self):
+    def has_errors(self) -> bool:
         return len(self.violations) > 0
 
-    def get_violations(self):
+    def get_violations(self) -> List[Tuple[str, str]]:
         return self.violations
