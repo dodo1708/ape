@@ -2,11 +2,12 @@ from __future__ import unicode_literals, print_function
 import codecs
 import json
 
+from typing import Dict, List
 __all__ = ['ProductSpecValidator']
 
 
 class ProductSpecValidator(object):
-    def __init__(self, spec_path, product_name, feature_list):
+    def __init__(self, spec_path: str, product_name: str, feature_list: List[str]) -> None:
         """
         Constructor
         :param spec_path: file path to the product spec json
@@ -18,7 +19,7 @@ class ProductSpecValidator(object):
         self.errors_mandatory = []
         self.errors_never = []
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """
         Checks the feature list product spec against.
         Checks if all mandartory features are contained;
@@ -37,28 +38,28 @@ class ProductSpecValidator(object):
 
         return not self.has_errors()
 
-    def get_errors_mandatory(self):
+    def get_errors_mandatory(self) -> List[str]:
         """
         Returns the list of features that are mandatory but missing in the passed feature list.
         :return: list
         """
         return self.errors_mandatory
 
-    def get_errors_never(self):
+    def get_errors_never(self) -> List[str]:
         """
         Returns the list if featzres that are declaed as "never" but are contained in the feature list.
         :return:
         """
         return self.errors_never
 
-    def has_errors(self):
+    def has_errors(self) -> bool:
         """
         Returns true if any error occured.
         :return: boolean
         """
         return len(self.get_errors_mandatory()) > 0 or len(self.get_errors_never()) > 0
 
-    def _read(self, spec_path, product_name):
+    def _read(self, spec_path: str, product_name: str) -> List[Dict[str, List[str]]]:
         """
         Reads the spec files and extracts the concrete product spec.
         :param spec_path:

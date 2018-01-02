@@ -10,7 +10,8 @@ import git
 import time
 
 
-def get_repo_name(repo_dir):
+from typing import Any, Dict, List, Optional, Union
+def get_repo_name(repo_dir: str) -> str:
     """
     Takes a directory (which must be a git repo) and returns the repository name, derived from
     remote.origin.url; <domain>/foo/bar.git => bar
@@ -41,7 +42,7 @@ def extract_feature_order_from_model_xml(file_path):
     return features
 
 
-def get_feature_order_constraints(container_dir):
+def get_feature_order_constraints(container_dir: str) -> Dict[str, Dict[str, Union[bool, List[str], List[Any]]]]:
     """
     Returns the feature order constraints dict defined in featuremodel/productline/feature_order.json
     :param container_dir: the container dir.
@@ -55,7 +56,7 @@ def get_feature_order_constraints(container_dir):
     return ordering_constraints
 
 
-def get_features_from_equation(container_dir, product_name):
+def get_features_from_equation(container_dir: str, product_name: str) -> List[str]:
     """
     :return: list of strings, each representing one feature
     """
@@ -79,7 +80,7 @@ def get_equation_git_string(fm_path):
     )
 
 
-def _path_is_valid_featuremodel_dir(path):
+def _path_is_valid_featuremodel_dir(path: Optional[str]) -> bool:
     check_list = (
         path is not None and os.path.exists(path),
         path is not None and os.path.isdir(path)
@@ -87,7 +88,7 @@ def _path_is_valid_featuremodel_dir(path):
     return False not in check_list
 
 
-def _get_featuremodel_path(container_dir):
+def _get_featuremodel_path(container_dir: str) -> str:
     """
     Either takes default path (relative to ape root) or, if set, the FEATUREMODEL_POOL_PATH.
     This path should be absolute and set in your initenv file, e.g. like that:

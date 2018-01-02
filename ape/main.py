@@ -1,17 +1,18 @@
 from __future__ import print_function, unicode_literals
+
 import argparse
-import inspect
 import importlib
-import sys
+import inspect
 import os
+import sys
 import traceback
-from featuremonkey import get_features_from_equation_file
-from ape.exceptions import TaskNotFound, FeatureNotFound, EnvironmentIncomplete, InvalidTask
-from ape import tasks
-
-
 from argparse import ArgumentParser
 from typing import Callable, List, Tuple, Union
+
+from ape import tasks
+from ape.exceptions import TaskNotFound, FeatureNotFound, EnvironmentIncomplete, InvalidTask
+from featuremonkey import get_features_from_equation_file
+
 ERRMSG_UNSUPPORTED_SIG = '''Task "%s" has an unsupported signature.
 Supported signatures are:
     - *args only

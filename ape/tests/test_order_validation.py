@@ -1,9 +1,10 @@
 from __future__ import absolute_import, unicode_literals
-import unittest
 
 import copy
-from ape.feaquencer import (
-    get_total_order,
+import unittest
+
+from ape.feaquencer import get_total_order
+from ape.feaquencer.exceptions import (
     MultipleFirstConditionsError,
     MultipleLastConditionsError,
     GraphCycleError

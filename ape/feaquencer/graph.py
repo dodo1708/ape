@@ -1,18 +1,7 @@
 from __future__ import unicode_literals
 
-from collections import defaultdict
-
-
 from collections import OrderedDict, defaultdict
-from typing import Any, Dict, List, Optional, Set, Union
-class GraphCycleError(Exception):
-    def __init__(self, cycle: List[str]) -> None:
-        msg = "Cycle was detected in dependency graph: \n \t"
-        for idx, feature in enumerate(cycle):
-            msg += " {feature}".format(feature=feature)
-            if idx != (len(cycle) - 1):
-                msg += " =>"
-        super(GraphCycleError, self).__init__(msg)
+from typing import Any, Dict, List, Optional, Set, Union, DefaultDict
 
 
 def to_graphviz(graph):
@@ -62,7 +51,7 @@ def detect_cycle(graph: Union[OrderedDict, Dict[str, List[str]], defaultdict, Di
     :return:
     """
 
-    visited_nodes = set()
+    visited_nodes: Set = set()
 
     for node in list(graph):
         if node not in visited_nodes:
@@ -82,7 +71,7 @@ def topsort(graph: Union[OrderedDict, defaultdict, Dict[str, List[str]], Dict[st
     :return:
     """
 
-    count = defaultdict(int)
+    count: DefaultDict[int] = defaultdict(int)
     for feature, node in graph.items():
         for target in node:
             count[target] += 1

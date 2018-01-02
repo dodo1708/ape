@@ -1,13 +1,13 @@
 # coding: utf-8
-from __future__ import unicode_literals, print_function
-from collections import defaultdict
+from __future__ import unicode_literals
 
 import copy
+from collections import defaultdict
+from typing import Dict, List, Optional, Union, DefaultDict
 
-from . import topsort, GraphCycleError
 from . import detect_cycle
+from . import topsort
 
-from typing import Dict, List, Optional, Union
 C_TYPES = (
     'first',
     'last',
@@ -19,22 +19,6 @@ FIRST = C_TYPES[0]
 LAST = C_TYPES[1]
 BEFORE = C_TYPES[2]
 AFTER = C_TYPES[3]
-
-
-class MultipleFirstConditionsError(Exception):
-    def __init__(self, msg: str, occ1: str, occ2: OrderingCondition) -> None:
-        super(MultipleFirstConditionsError, self).__init__(msg)
-        self.occurences = [occ1, occ2]
-
-
-class MultipleLastConditionsError(Exception):
-    def __init__(self, msg: str, occ1: str, occ2: OrderingCondition) -> None:
-        super(MultipleLastConditionsError, self).__init__(msg)
-        self.occurences = [occ1, occ2]
-
-
-class AfterConditionToLastError(Exception):
-    pass
 
 
 class OrderingCondition(object):
@@ -53,13 +37,21 @@ class OrderingCondition(object):
         self.ctype = ctype
 
 
+from ape.feaquencer.exceptions import (
+    MultipleFirstConditionsError,
+    MultipleLastConditionsError,
+    AfterConditionToLastError,
+    GraphCycleError
+)
+
+
 class OrderingConditions(object):
     def __init__(self, ordering_conditions: Optional[List[OrderingCondition]] = None) -> None:
-        self.first = None
-        self.last = None
+        self.first: str = None
+        self.last: str = None
         # self.before stores features as keys.
         # Each feature has a list of features which need to be loaded before the feature.
-        self.before = defaultdict(list)
+        self.before: DefaultDict[list] = defaultdict(list)
         if ordering_conditions:
             for condition in ordering_conditions:
                 self.add_condition(condition)
@@ -101,7 +93,7 @@ class OrderingConditions(object):
                 self.before[condition.name].append(condition.subject)
 
 
-def _get_formatted_feature_dependencies(data: Dict[str, Union[Dict[str, List[str]], Dict[str, bool], Dict[str, Union[List[str], bool]]]]) -> List[Dict[str, Union[str, NoneType]]]:
+def _get_formatted_feature_dependencies(data: Dict[str, Union[Dict[str, List[str]], Dict[str, bool], Dict[str, Union[List[str], bool]]]]) -> List[Dict[str, Union[str, None]]]:
     """
     Takes the format of the feature_order.json in featuremodel pool.
     Creates a list of conditions in the following format:
@@ -138,7 +130,7 @@ def _get_formatted_feature_dependencies(data: Dict[str, Union[Dict[str, List[str
     return conditions
 
 
-def _get_condition_instances(data: List[Dict[str, Union[str, NoneType]]]) -> List[OrderingCondition]:
+def _get_condition_instances(data: List[Dict[str, Union[str, None]]]) -> List[OrderingCondition]:
     """
     Returns a list of OrderingCondition instances created from the passed data structure.
     The structure should be a list of dicts containing the necessary information:
